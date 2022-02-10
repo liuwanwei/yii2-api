@@ -1,0 +1,27 @@
+{
+    "name": "buddysoft/yii2-api",
+    "type": "yii2-extension",
+    "description": "Commonly used API interfaces",
+    "homepage": "https://github.com/liuwanwei/yii2-api",
+    "license": "MIT",
+    "authors": [{
+        "name": "liuwanwei",
+        "email": "liuwanwei@gmail.com",
+        "homepage": "https://weibo.com/iHarbor",
+        "role": "developer"
+    }],
+    "require": {
+        "php": ">=5.6.15",
+        "yidas/yii2-bower-asset": "~2.0.5",
+        "yiisoft/yii2": "~2.0.14"
+    },
+    "autoload": {
+        "psr-4": {
+            "buddysoft\\api\\": ""
+        }
+    },
+    "config": {
+        "process-timeout": 1800,
+        "discard-changes": true
+    }
+}
