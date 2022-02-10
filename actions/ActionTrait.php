@@ -9,6 +9,7 @@
 namespace buddysoft\api\actions;
 
 use Yii;
+use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
 // 返回数据错误类型
@@ -339,12 +340,13 @@ trait ActionTrait
 	 *
 	 * @return array response array matches protocol
 	 */
-	public function failedWhenSaveModel($model, $context = null){
+	public function failedWhenSaveModel(Model $model, $context = null){
 		$error = $this->_mergeMessage('', $context ? $context : '保存失败：');
 
-		$model->getFirstError();
+		// 只返回首个错误属性的错误信息
+		$firstErrors = $model->getFirstErrors();
+		$error .= array_shift($firstErrors);
 
-		$error .= ErrorFormatter::fromModel($model);
 		return [
 			'status' => STATUS_CAN_NOT_SAVE,
 			'msg' => $error,

@@ -13,7 +13,7 @@ class ActiveController extends \yii\rest\ActiveController{
 	public function behaviors(){
 		$behaviors = parent::behaviors();
 		$behaviors['authenticator'] = [
-			'class' => HttpBasicAuth::className()
+			'class' => HttpBasicAuth::class,
 		];
 
         // 永远返回 JSON 格式数据
