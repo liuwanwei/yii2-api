@@ -6,7 +6,7 @@
  * Time: 10:15
  */
 
-namespace buddysoft\widget\actions;
+namespace buddysoft\api\actions;
 
 class ViewAction extends \yii\rest\ViewAction
 {

@@ -14,48 +14,22 @@ class ApiController extends \yii\web\Controller{
 	const CODE_VALIDATION_FAILED		= -5;		// Model 对象验证错误
 	const CODE_INTERNAL_ERROR			= -100; 	// 内部错误
 
-  public $dataEnvelope = 'items';
+	const CODE = "code";
+	const MSG = "message";
+	const DATA = "data";
 
-	private function areTheKeysAllStringType($data){
-		$keys = array_keys($data);
-		foreach ($keys as $key) {
-			if (is_int($key)) {
-				return false;
-			}
-		}
+	public static $sCode 	= self::CODE;
+	public static $sMsg 	= self::MSG;
+	public static $sData 	= self::DATA;
 
-		return true;
-	}
-
-	public function makeDataMessage($code = 0, $msg = '', $data = null, $json=true) {
+	public function makeDataMessage($code = 0, $msg = '', $data = null) {
 		$result = ['status' => $code, 'msg' => $msg];
-
-		//判断data为空时不创建进json数据中
-
-		if (!empty($data)) {
-			if (is_array($data) && 0 != count($data)) {
-				if ($this->areTheKeysAllStringType($data)) {
-					foreach ($data as $key => $value) {
-						$result[$key] = $value;
-					}
-				}else{
-					$result[$this->dataEnvelope] = $data;
-				}				
-			}else if (is_object($data)) {
-				$result['object'] = $data;
-			}else{
-				$result['extra'] = $data;
-			}
+		
+		if ($data) {
+			$result['data'] = $data;
 		}
 		
-		if ($json) {
-			// 使用 Response 来控制输出 JSON 数据，而不是自己转换
-			Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		}
-
 		return $result;
-		
-		// return \yii\helpers\Json::encode($result);
 	}
 
 	/**

@@ -8,6 +8,7 @@
 
 namespace buddysoft\api\actions;
 
+use buddysoft\api\controllers\ApiController;
 use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
@@ -189,9 +190,9 @@ trait ActionTrait
 	 */
 	public function classicObjectWithParam($class){
 		$name = $this->shortClassName($class);
-    $sidName = $name . 'Sid';
+    	$sidName = $name . 'Sid';
 
-    return $this->objectWithParam($sidName, $class);
+    	return $this->objectWithParam($sidName, $class);
 	}
 
 
@@ -326,10 +327,7 @@ trait ActionTrait
 	 * @param string $context 发生错误时的现场描述
 	 */
 	public function failedWithWrongParam($context = null){
-		return [
-			'status' => STATUS_INVALID_PARAM,
-			'msg' => $this->_mergeMessage('参数错误', $context),
-		];
+		return $this->exit(STATUS_INVALID_PARAM, $this->_mergeMessage('参数错误', $context));
 	}
 	
 	/*
@@ -347,10 +345,7 @@ trait ActionTrait
 		$firstErrors = $model->getFirstErrors();
 		$error .= array_shift($firstErrors);
 
-		return [
-			'status' => STATUS_CAN_NOT_SAVE,
-			'msg' => $error,
-		];
+		return $this->exit(STATUS_CAN_NOT_SAVE, $error);
 	}
 	
 	public function failedWhenDeleteModel($model, $context = null){
@@ -361,10 +356,7 @@ trait ActionTrait
 	 * 超过阈值时的反馈消息
 	 */
 	public function failedWithExceedLimit($context = null){
-		return [
-			'status' => STATUS_EXCEED_LIMIT,
-			'msg' => $this->_mergeMessage('超过限制', $context),
-		];
+		return $this->exit(STATUS_EXCEED_LIMIT, $this->_mergeMessage('超过限制', $context));
 	}
 	
 	/*
@@ -373,24 +365,21 @@ trait ActionTrait
 	 * @param string $context 错误原因
 	 */
 	public function failedWithReason($reason, $status = STATUS_FAILED_FOR_REASON){
-		return [
-			'status' => $status,
-			'msg' => $reason,
-		];
+		return $this->exit($status, $reason);
 	}
 	
 	/*
 	 * 只返回成功状态信息的反馈消息
 	 */
 	public function success($context = null){
-		return [
-			'status' => STATUS_SUCCESS,
-			'msg' => $context ? $context : '成功'
-		];
+		return $this->exit(STATUS_SUCCESS, $context);
 	}
 	
 	/*
 	 * 格式化执行成功时返回对象信息反馈消息
+	 * 
+	 * @param \yii\db\ActiveRecord $object
+	 * @param string $context
 	 */
 	public function successWithObject($object, $context = null){
 		return [
@@ -398,5 +387,42 @@ trait ActionTrait
 			'msg' => $context ? $context : '成功',
 			'object' => $object,
 		];
+
+		$this->exit(STATUS_SUCCESS, null, ['object' => $object]);
 	}
+
+	/**
+	 * 最底层封装返回数据格式，所有返回数据最终都要调用这里
+	 *
+	 * @param integer $code
+	 * @param string $message
+	 * @param array $data
+	 * @return array
+	 */
+	public function exit(int $code, string $message = null, array $data = null){
+		$result = [
+			ApiController::$sCode => $code,
+			ApiController::$sMsg => $message ? $message : '成功',			
+		];
+
+		if ($data) {
+			$result[ApiController::$sData] = $data;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 使用统一的封装返回 API 数据
+	 * 
+	 * v3.0.0 引入
+	 *
+	 * @param array $data
+	 * @param string|null $context
+	 * @return void
+	 */
+	public function successWithData(array $data, string $context = null)
+	{
+		return $this->exit(STATUS_SUCCESS, $context, $data);
+	}	
 }

@@ -6,7 +6,7 @@
  * Time: 21:27
  */
 
-namespace buddysoft\widget\actions;
+namespace buddysoft\api\actions;
 
 
 trait ModelTrait

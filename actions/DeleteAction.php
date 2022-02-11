@@ -1,6 +1,6 @@
 <?php
 
-namespace buddysoft\widget\actions;
+namespace buddysoft\api\actions;
 
 use yii\web\ServerErrorHttpException;
 

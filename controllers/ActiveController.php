@@ -171,15 +171,15 @@ class ActiveController extends \yii\rest\ActiveController{
 
                     // 格式化异常错误反馈
                     $data = [
-                        'status' => $code,
-                        'msg' => $msg,
+                        'code' => $code,
+                        'message' => $msg,
                     ];
                 }
             }else if (isset($data[static::QUERY_ENVELOPE])){
                 // 正常查询结果请求时，返回的数组数据，增加一层封装
                 $data = [
-                    'status' => 0,
-                    'msg' => '查询成功',
+                    'code' => 0,
+                    'message' => '查询成功',
                     static::QUERY_ENVELOPE => $data[static::QUERY_ENVELOPE],
                 ];
             }
