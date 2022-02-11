@@ -259,6 +259,14 @@ trait ActionTrait
 			return $category . ': ' . $context;
 		}
 	}
+
+	public function post(string $key) {
+		return Yii::$app->request->post($key);
+	}
+
+	public function get(string $key){
+		return Yii::$app->request->get($key);
+	}
 	
 	/*
 	 * 更新 GET 请求中的查询参数
@@ -314,7 +322,7 @@ trait ActionTrait
 	 * @return boolean
 	 */
 	public function isSuccess($result){
-		if (isset($result['status']) && $result['status'] === 0){
+		if (isset($result[ApiController::$sCode]) && $result[ApiController::$sCode] === STATUS_SUCCESS){
 			return true;
 		}else{
 			return false;
