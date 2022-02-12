@@ -268,7 +268,7 @@ trait ActionTrait
 		return Yii::$app->request->get($key);
 	}
 	
-	/*
+	/**
 	 * 更新 GET 请求中的查询参数
 	 */
 	public function updateQueryParam($params){
@@ -280,7 +280,7 @@ trait ActionTrait
 		$request->queryParams = $newParams;
 	}
 	
-	/*
+	/**
 	 * 向 Rest 请求的 body 参数中增加经过中间处理的参数
 	 *
 	 * @param array $params 中间处理过新加入的参数

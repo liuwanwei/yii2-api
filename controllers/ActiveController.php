@@ -36,25 +36,25 @@ class ActiveController extends \yii\rest\ActiveController{
     	$customActions = [
             // 对于具备 deleted 字段的表，执行假删除
     		'delete' => [
-    			'class' => 'buddysoft\widget\actions\DeleteAction',
+    			'class' => 'buddysoft\api\actions\DeleteAction',
     			'modelClass' => $this->modelClass,                
                 'checkAccess' => [$this, 'checkAccess'],                
     		],
             // 对于创建和更新，重新查询并返回数据，保证用户传来的 string 格式的整型值被正确转换成 integer
             'create' => [
-                'class' => 'buddysoft\widget\actions\CreateAction',
+                'class' => 'buddysoft\api\actions\CreateAction',
                 'modelClass' => $this->modelClass,
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->createScenario,
             ],
             'update' => [
-                'class' => 'buddysoft\widget\actions\UpdateAction',
+                'class' => 'buddysoft\api\actions\UpdateAction',
                 'modelClass' => $this->modelClass,
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
             ],
             'view' => [
-                'class' => 'buddysoft\widget\actions\ViewAction',
+                'class' => 'buddysoft\api\actions\ViewAction',
                 'modelClass' => $this->modelClass,
                 'checkAccess' => [$this, 'checkAccess'],
             ],
@@ -142,7 +142,7 @@ class ActiveController extends \yii\rest\ActiveController{
         $response = $event->sender;
 
         /**
-         * Yii 框架产生的异常会填充 $response->data['status'] 字段，这是下面处理的基础
+         * Yii 框架产生的 HTTP 异常会填充 $response->data['status'] 字段，这是下面处理的基础
          */
 
         if ($response->data != null) {
