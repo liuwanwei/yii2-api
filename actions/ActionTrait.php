@@ -13,20 +13,6 @@ use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
-// 返回数据错误类型
-define('STATUS_SUCCESS', 0);
-define('STATUS_INVALID_PARAM', 		-1);    	// 参数错误
-
-define('STATUS_CAN_NOT_SAVE', 		-12);    	// 无法保存，跟 ApiController 冲突，- 10
-define('STATUS_EXCEED_LIMIT', 		-13);    	// 越界，跟 ApiController 冲突，- 10
-
-define('STATUS_NOT_EXIST', 				-4);			// 不存在
-
-define('STATUS_NOT_MATCH', 				-15);    	// 不匹配，跟 ApiController 冲突，- 10
-define('STATUS_ALREADY_EXIST', 		-16);    	// 已存在，跟 ApiController 冲突，- 10
-define('STATUS_FAILED_FOR_REASON',-10);			// 其它错误，原因在 msg 中给出
-
-
 trait ActionTrait
 {
 	/**
@@ -322,7 +308,7 @@ trait ActionTrait
 	 * @return boolean
 	 */
 	public function isSuccess($result){
-		if (isset($result[ApiController::$sCode]) && $result[ApiController::$sCode] === STATUS_SUCCESS){
+		if (isset($result[ApiController::$sCode]) && $result[ApiController::$sCode] === ApiController::CODE_SUCCESS){
 			return true;
 		}else{
 			return false;
@@ -335,7 +321,7 @@ trait ActionTrait
 	 * @param string $context 发生错误时的现场描述
 	 */
 	public function failedWithWrongParam($context = null){
-		return $this->exit(STATUS_INVALID_PARAM, $this->_mergeMessage('参数错误', $context));
+		return $this->exit(ApiController::CODE_INVALID_PARAM, $this->_mergeMessage('参数错误', $context));
 	}
 	
 	/*
@@ -353,7 +339,7 @@ trait ActionTrait
 		$firstErrors = $model->getFirstErrors();
 		$error .= array_shift($firstErrors);
 
-		return $this->exit(STATUS_CAN_NOT_SAVE, $error);
+		return $this->exit(ApiController::CODE_INTERNAL_ERROR, $error);
 	}
 	
 	public function failedWhenDeleteModel($model, $context = null){
@@ -364,7 +350,7 @@ trait ActionTrait
 	 * 超过阈值时的反馈消息
 	 */
 	public function failedWithExceedLimit($context = null){
-		return $this->exit(STATUS_EXCEED_LIMIT, $this->_mergeMessage('超过限制', $context));
+		return $this->exit(ApiController::CODE_EXCESS_LIMIT, $this->_mergeMessage('超过限制', $context));
 	}
 	
 	/*
@@ -372,7 +358,7 @@ trait ActionTrait
 	 *
 	 * @param string $context 错误原因
 	 */
-	public function failedWithReason($reason, $status = STATUS_FAILED_FOR_REASON){
+	public function failedWithReason($reason, $status = ApiController::CODE_INTERNAL_ERROR){
 		return $this->exit($status, $reason);
 	}
 	
@@ -380,7 +366,7 @@ trait ActionTrait
 	 * 只返回成功状态信息的反馈消息
 	 */
 	public function success($context = null){
-		return $this->exit(STATUS_SUCCESS, $context);
+		return $this->exit(ApiController::CODE_SUCCESS, $context);
 	}
 	
 	/*
@@ -390,13 +376,7 @@ trait ActionTrait
 	 * @param string $context
 	 */
 	public function successWithObject($object, $context = null){
-		return [
-			'status' => STATUS_SUCCESS,
-			'msg' => $context ? $context : '成功',
-			'object' => $object,
-		];
-
-		$this->exit(STATUS_SUCCESS, null, ['object' => $object]);
+		return $this->exit(ApiController::CODE_SUCCESS, null, ['object' => $object]);
 	}
 
 	/**
@@ -427,10 +407,23 @@ trait ActionTrait
 	 *
 	 * @param array $data
 	 * @param string|null $context
-	 * @return void
+	 * @return array
 	 */
 	public function successWithData(array $data, string $context = null)
 	{
-		return $this->exit(STATUS_SUCCESS, $context, $data);
-	}	
+		return $this->exit(ApiController::CODE_SUCCESS, $context, $data);
+	}
+
+	/**
+	 * 没有权限时返回错误信息
+	 *
+	 * @return array
+	 */
+	public function failedWithPrivilege(string $context = null){
+		return $this->exit(ApiController::CODE_UNAUTHORIZED, $context);
+	}
+
+	public function failedWithNotExist(){
+		return $this->exit(ApiController::CODE_NOT_EXIST, '对象不存在');
+	}
 }

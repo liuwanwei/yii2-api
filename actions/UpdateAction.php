@@ -47,7 +47,12 @@ class UpdateAction extends \yii\rest\UpdateAction{
         // 重新查询，保证用户传来的 string 格式的整型值被正确转换成 integer
 	    $modelClass = $this->modelClass;
 	    $model = $modelClass::findOne($model->id);
+
+		// 获得对象类名字（不带路径）
+        $arr = explode('\\', $this->modelClass);
+        $classLastName = array_pop($arr);
+        $classLastName = strtolower($classLastName);
 	    
-        return $this->successWithObject($model, '更新成功');
+        return $this->successWithData([$classLastName => $model]);
     }
 }
