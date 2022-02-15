@@ -24,10 +24,10 @@ class ApiController extends \yii\web\Controller{
 	public static $sData 	= self::DATA;
 
 	public function makeDataMessage($code = 0, $msg = '', $data = null) {
-		$result = ['status' => $code, 'msg' => $msg];
+		$result = [static::$sCode => $code, static::$sMsg => $msg];
 		
 		if ($data) {
-			$result['data'] = $data;
+			$result[static::$sData] = $data;
 		}
 		
 		return $result;
