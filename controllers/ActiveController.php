@@ -1,9 +1,10 @@
 <?php
-
 namespace buddysoft\api\controllers;
 
+use buddysoft\api\actions\ActionTool;
 use Yii;
 use yii\filters\auth\HttpBasicAuth;
+use yii\rest\Serializer;
 
 class ActiveController extends \yii\rest\ActiveController{
 
@@ -24,11 +25,15 @@ class ActiveController extends \yii\rest\ActiveController{
 
 	// 将查询返回的数据增加一个信封：items
 	public $serializer = [
-        'class' => 'yii\rest\Serializer',
+        'class' => Serializer::class,
         'collectionEnvelope' => self::QUERY_ENVELOPE,
     ];
 
-    // 配置 actions 的特殊处理过程
+    /**
+     * 配置 actions 的默认处理方式
+     *
+     * @return array
+     */
     public function actions(){
     	$actions = parent::actions();
     	$actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
@@ -61,6 +66,35 @@ class ActiveController extends \yii\rest\ActiveController{
     	];
 
     	return array_merge($actions, $customActions);
+    }
+
+    /**
+     * 对反馈的数据进行格式化处理
+     * 
+     * 任何需要对标准返回内容进行额外处理的代码都可以放在这里。
+     * 
+     * 对运行中发生异常的处理放在了 \buddysoft\api\behaviors\ExceptionFormatter 中实现。
+     */
+    public function afterAction($action, $result)
+    {
+        $data = parent::afterAction($action, $result);
+        
+        if (isset($data[static::QUERY_ENVELOPE])){
+            /**
+             * 对以 prepareDataProvider() 方式提供的数据，封装到 'data' 字段里
+             */
+            $collectionKey = ActionTool::collectionNameForModel($this->modelClass);
+
+            $data = [
+                'code' => 0,
+                'message' => '查询成功',
+                'data' => [
+                    $collectionKey => $data[static::QUERY_ENVELOPE],
+                ]
+            ];
+        }
+
+        return $data;
     }
 
     /**
@@ -121,68 +155,5 @@ class ActiveController extends \yii\rest\ActiveController{
             $msg = '禁止访问不属于自己的数据';
         }
         throw new \yii\web\ForbiddenHttpException($msg);
-    }
-
-    /**
-     *
-     * 如果 RESTFul 请求处理过程中发生异常，将异常消息转化成协议中规定的格式
-     * 使用时，在 main.php 的 components 中配置：
-     * 
-     * 'response' => [
-     *    'class' => 'yii\web\Response',
-     *    'charset' => 'UTF-8',
-     *    'on beforeSend' => function($event){
-     *        ActiveController::onBeforeSend($event);
-     *    },
-     * ],
-     *
-     */
-    
-    public static function onBeforeSend($event){
-        $response = $event->sender;
-
-        /**
-         * Yii 框架产生的 HTTP 异常会填充 $response->data['status'] 字段，这是下面处理的基础
-         */
-
-        if ($response->data != null) {
-            // 注意：此处传递的是引用
-            $data = &$response->data;
-            $code = null;
-            if (isset($data['status'])) {
-                // 将 Yii2 框架生成的异常信息，转换成符合自身协议格式的信息
-                if($data['status'] == 400){
-                    $code = ApiController::CODE_INVALID_PARAM;
-                    $msg = $data['message'];
-                }else if ($data['status'] == 401) {
-                    $code = ApiController::CODE_UNAUTHORIZED;
-                    $msg = '请求包认证信息错误';
-                }else if($data['status'] == 404){
-                    $code = ApiController::CODE_NOT_EXIST;
-                    $msg = '请求的对象不存在';
-                }else if($data['status'] == 403){
-                    $code = ApiController::CODE_UNAUTHORIZED;
-                    $msg = $data['message'];
-                }
-
-                if ($code != null) {
-                    // 将调整过的异常反馈当作正常数据，请求端(app或小程序)只通过 status 区分
-                    $response->statusCode = 200;
-
-                    // 格式化异常错误反馈
-                    $data = [
-                        'code' => $code,
-                        'message' => $msg,
-                    ];
-                }
-            }else if (isset($data[static::QUERY_ENVELOPE])){
-                // 正常查询结果请求时，返回的数组数据，增加一层封装
-                $data = [
-                    'code' => 0,
-                    'message' => '查询成功',
-                    static::QUERY_ENVELOPE => $data[static::QUERY_ENVELOPE],
-                ];
-            }
-        }
     }
 }

@@ -39,10 +39,8 @@ class CreateAction extends \yii\rest\CreateAction{
         $this->newObject = $model;
 
         // 获得对象类名字（不带路径）
-        $arr = explode('\\', $this->modelClass);
-        $classLastName = array_pop($arr);
-        $classLastName = strtolower($classLastName);
+        $key = ActionTool::collectionNameForModel($this->modelClass);
 
-        return $this->successWithData([$classLastName => $model]);
+        return $this->successWithData([$key => $model]);
     }
 }
