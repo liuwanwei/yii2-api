@@ -83,7 +83,7 @@ class ActiveController extends \yii\rest\ActiveController{
             /**
              * 对以 prepareDataProvider() 方式提供的数据，封装到 'data' 字段里
              */
-            $collectionKey = ActionTool::collectionNameForModel($this->modelClass);
+            $collectionKey = ActionTool::collectionNameForModel($this->modelClass, true);
 
             $data = [
                 'code' => 0,

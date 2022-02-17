@@ -20,14 +20,20 @@ class ActionTool {
      * 定义成静态接口，是为了供 UpdateAction 和  CreateAction 使用。
      * 
      * @param string $modelClass 如：'common\models\User'
+     * @param bool $pluralize 是否需要复数形式
      * @return string 'User'
      */
-    public static function collectionNameForModel(string $modelClass){
+    public static function collectionNameForModel(string $modelClass, bool $pluralize = false){
         // 获得对象类名字（不带路径）
         $arr = explode('\\', $modelClass);
         $classLastName = array_pop($arr);
         $classLastName = strtolower($classLastName);
-        return \yii\helpers\Inflector::pluralize($classLastName);
+
+        if ($pluralize){
+            return \yii\helpers\Inflector::pluralize($classLastName);
+        }else{
+            return $classLastName;
+        }
     }
 }
 ?>
