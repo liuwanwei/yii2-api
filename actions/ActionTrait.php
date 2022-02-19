@@ -290,13 +290,9 @@ trait ActionTrait
 	{
 		$request = Yii::$app->request;
 		if ($request->isPost || $request->isPatch || $request->isPut) {
-			$oldParams = $request->getBodyParams();
-			$newParams = ArrayHelper::merge($oldParams, $params);
-			$request->setBodyParams($newParams);
+			$this->updateRequestBody($params);
 		}else{
-			$oldParams = $request->queryParams;
-			$newParams = ArrayHelper::merge($oldParams, $params);			
-			$request->queryParams = $newParams;				
+			$this->updateQueryParam($params);
 		}
 	}
 	

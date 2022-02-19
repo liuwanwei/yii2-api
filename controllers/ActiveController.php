@@ -89,6 +89,7 @@ class ActiveController extends \yii\rest\ActiveController{
                 'code' => 0,
                 'message' => '查询成功',
                 'data' => [
+                    'count' => count($data[static::QUERY_ENVELOPE]),
                     $collectionKey => $data[static::QUERY_ENVELOPE],
                 ]
             ];
