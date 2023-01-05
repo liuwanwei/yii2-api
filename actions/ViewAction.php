@@ -3,7 +3,8 @@
  * Created by PhpStorm.
  * User: sungeo
  * Date: 2018/1/30
- * Time: 10:15
+ * Update:
+ * 	- 2023/1/5 11:15 返回数据时将 model name 作为键值封装 model 对象
  */
 
 namespace buddysoft\api\actions;
@@ -23,7 +24,9 @@ class ViewAction extends \yii\rest\ViewAction
 		if ($this->checkAccess) {
 			call_user_func($this->checkAccess, $this->id, $model);
 		}
+
+		$key = ActionTool::collectionNameForModel($this->modelClass);
 		
-		return $this->successWithObject($model);
+		return $this->successWithData([$key => $model]);
 	}
 }

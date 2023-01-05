@@ -231,20 +231,7 @@ trait ActionTrait
 		}else{
 			return $result;
 		}
-	}
-	
-	/*
-	 * 合并错误信息和上下文信息到一个字符串
-	 */
-	private function _mergeMessage($category, $context){
-		if (empty($category)) {
-			return $context;
-		} else if (empty($context)) {
-			return $category;
-		}else {
-			return $category . ': ' . $context;
-		}
-	}
+	}	
 
 	public function post(string $key) {
 		return Yii::$app->request->post($key);
@@ -296,7 +283,7 @@ trait ActionTrait
 		}
 	}
 	
-	/*
+	/**
 	 * 检查 action 执行结果是否成功
 	 *
 	 * @param array $result 执行结果，至少包括 status 和 msg 元素
@@ -311,7 +298,7 @@ trait ActionTrait
 		}
 	}
 	
-	/*
+	/**
 	 * 参数错误返回信息封装
 	 *
 	 * @param string $context 发生错误时的现场描述
@@ -320,7 +307,7 @@ trait ActionTrait
 		return $this->exit(ApiController::CODE_INVALID_PARAM, $this->_mergeMessage('参数错误', $context));
 	}
 	
-	/*
+	/**
 	 * 保存 Model 对象到数据库失败时，返回对应错误信息给客户端
 	 *
 	 * @param Model  $model   所要保存的对象
@@ -329,20 +316,33 @@ trait ActionTrait
 	 * @return array response array matches protocol
 	 */
 	public function failedWhenSaveModel(Model $model, $context = null){
-		$error = $this->_mergeMessage('', $context ? $context : '保存失败：');
+		$class = $model::class;
+		$error = $this->_mergeMessage("保存 {$class} 对象", $context ? $context : '保存失败：');
 
-		// 只返回首个错误属性的错误信息
-		$firstErrors = $model->getFirstErrors();
-		$error .= array_shift($firstErrors);
+		// 返回保存错误信息总结
+		$error .= ActionTool::makeErrorSummary($model);
 
 		return $this->exit(ApiController::CODE_INTERNAL_ERROR, $error);
 	}
 	
+	/**
+	 * 删除对象失败返回错误信息
+	 *
+	 * @param Model $model
+	 * @param string $context
+	 * @return array
+	 */
 	public function failedWhenDeleteModel($model, $context = null){
-		return $this->failedWhenSaveModel($model, $context ? $context : '删除失败：');
+		$class = $model::class;
+		$error = $this->_mergeMessage("删除 {$class} 对象", $context ? $context : '删除失败：');
+
+		// 返回保存错误信息总结
+		$error .= ActionTool::makeErrorSummary($model);
+
+		return $this->exit(ApiController::CODE_INTERNAL_ERROR, $error);
 	}
 	
-	/*
+	/**
 	 * 超过阈值时的反馈消息
 	 */
 	public function failedWithExceedLimit($context = null){
@@ -416,10 +416,29 @@ trait ActionTrait
 	 * @return array
 	 */
 	public function failedWithPrivilege(string $context = null){
+		if ($context == null) $context = '没有权限';
 		return $this->exit(ApiController::CODE_UNAUTHORIZED, $context);
 	}
 
 	public function failedWithNotExist(){
 		return $this->exit(ApiController::CODE_NOT_EXIST, '对象不存在');
+	}
+
+	/**
+	 * 合并错误信息和上下文信息到一个字符串
+	 * 
+	 * @param string $category 错误分类，如 “参数错误“， ”超过限制“ 等
+	 * @param string $context 错误现场信息，一般由用户自定义
+	 * 
+	 * @return string 合并后的错误描述信息
+	 */
+	private function _mergeMessage($category, $context){
+		if (empty($category)) {
+			return $context;
+		} else if (empty($context)) {
+			return $category;
+		}else {
+			return $category . ' -> ' . $context;
+		}
 	}
 }

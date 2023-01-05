@@ -1,5 +1,6 @@
 <?php
 namespace buddysoft\api\actions;
+use yii\base\Model;
 
 class ActionTool {
 
@@ -34,6 +35,11 @@ class ActionTool {
         }else{
             return $classLastName;
         }
+    }
+
+    public static function makeErrorSummary(Model $model)
+    {
+        return print_r($model->getErrorSummary(false), true);
     }
 }
 ?>
