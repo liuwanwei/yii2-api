@@ -2,11 +2,14 @@
 namespace buddysoft\api\controllers;
 
 use buddysoft\api\actions\ActionTool;
+use buddysoft\api\actions\ResponseTrait;
 use Yii;
 use yii\filters\auth\HttpBasicAuth;
 use yii\rest\Serializer;
 
 class ActiveController extends \yii\rest\ActiveController{
+
+    use ResponseTrait;
 
     const QUERY_ENVELOPE = 'items';
 
@@ -66,6 +69,20 @@ class ActiveController extends \yii\rest\ActiveController{
     	];
 
     	return array_merge($actions, $customActions);
+    }
+
+    /**
+     * 当请求处理过程中抛出 WrongParamException 异常时，直接返回参数错误给请求者。
+     * 从原理上说，想抛出异常，调用 [[ActionTrait::getGet()]] 或 [[]ActionTrait::getPost()] 时，$strict 参数传 true，如果没有找到该参数，就会抛出异常。
+     * 这里捕获到异常，就直接结束处理并返回标准化的参数错误提示内容。
+     */
+    public function runAction($id, $params = [])
+    {
+        try{
+            return parent::runAction($id, $params);
+        }catch(\buddysoft\api\WrongParamException $e){
+            return $this->failedWithWrongParam($e->getMessage());
+        }
     }
 
     /**

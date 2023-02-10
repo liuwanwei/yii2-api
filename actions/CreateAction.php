@@ -3,7 +3,6 @@
 namespace buddysoft\api\actions;
 
 use Yii;
-use yii\helpers\Json;
 use yii\web\ServerErrorHttpException;
 
 
@@ -23,11 +22,10 @@ class CreateAction extends \yii\rest\CreateAction{
      */
     public function run()
     {        
-        /** @var $model \yii\db\ActiveRecord */
+        /** @var \yii\base\Model $model */
         $model = parent::run();
         if ($model->hasErrors()){
-            // 将 PHP 数组转换为 JSON 后，造成可读性下降，不知道有没有更好的方法。
-            return $this->failedWithWrongParam(Json::encode($model->getFirstErrors()));
+            return $this->failedWithWrongParam(ActionTool::makeErrorSummary($model));
         }
 
         /**

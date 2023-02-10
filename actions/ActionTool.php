@@ -39,7 +39,8 @@ class ActionTool {
 
     public static function makeErrorSummary(Model $model)
     {
-        return print_r($model->getErrorSummary(false), true);
+        $errors = $model->getFirstErrors();
+        return reset($errors);
     }
 }
 ?>
